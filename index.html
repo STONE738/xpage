@@ -3,204 +3,343 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Phúc Bùi – Tools cá nhân</title>
-  <meta name="description" content="Kho công cụ cá nhân chạy trên GitHub Pages – làm nhanh, dùng online." />
+  <title>Phúc Bùi – Tools & Projects</title>
+  <meta name="description" content="Kho công cụ cá nhân – macOS style, thêm tool trực tiếp, quản lý dự án." />
   <style>
     :root{
-      --bg:#0b0d10;--card:#12161b;--muted:#8b95a1;--txt:#e5e7eb;
-      --acc:#22c55e;--acc2:#38bdf8;--line:#1f2937
+      --bg:#f5f5f7;--txt:#1c1c1e;--muted:#6e6e73;--line:#d2d2d7;
+      --card:#fff;--shadow:rgba(0,0,0,.12);
+      --accent:#007aff;--accent-2:#0ea5e9;
+      --red:#ff5f57;--yellow:#febc2e;--green:#28c840;
     }
-    *{box-sizing:border-box}
+    *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--txt);
-      font:14px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
-    a{color:inherit;text-decoration:none}
-    .wrap{display:grid;grid-template-columns:260px 1fr;min-height:100dvh}
-    .side{border-right:1px solid var(--line);background:linear-gradient(180deg,#0e1217, #0a0d11)}
-    .brand{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--line)}
-    .logo{width:34px;height:34px;border-radius:10px;background:radial-gradient(circle at 30% 30%, var(--acc2), transparent),radial-gradient(circle at 70% 70%, var(--acc), transparent);box-shadow:0 0 0 1px #1f2937}
-    .brand h1{font-size:16px;margin:0}
-    .muted{color:var(--muted)}
-    .nav{display:flex;flex-direction:column;padding:8px}
-    .nav .group{padding:8px 12px;font-weight:600;color:#b9c2cf;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
-    .nav button{display:flex;justify-content:space-between;align-items:center;width:100%;gap:10px;padding:10px 12px;margin:4px 8px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--txt);cursor:pointer}
-    .nav button:hover{background:#0f1319;border-color:#1f2937}
-    .nav button.active{background:#0f172a;border-color:#243044}
-    .tag{font-size:11px;color:#a7f3d0;background:#064e3b;border:1px solid #0b624a;padding:2px 6px;border-radius:999px}
+    body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--txt);}
 
-    .main{display:flex;flex-direction:column;min-width:0}
-    .top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);backdrop-filter:saturate(140%) blur(6px);position:sticky;top:0;background:rgba(11,13,16,.7)}
-    .top .title{display:flex;align-items:center;gap:10px}
-    .top h2{font-size:16px;margin:0}
-    .actions{display:flex;gap:8px}
-    .btn{background:#111827;border:1px solid #273244;color:var(--txt);padding:8px 12px;border-radius:10px;cursor:pointer}
-    .btn:hover{background:#0b1220}
-    .btn.acc{background:var(--acc);border-color:#166534;color:#052e16;font-weight:700}
+    /* Layout */
+    .app{display:flex;gap:0;height:100vh}
+    .sidebar{width:280px;background:linear-gradient(180deg,#fff,#fbfbfd);border-right:1px solid var(--line);display:flex;flex-direction:column}
+    .sb-head{padding:18px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+    .sb-head h1{font-size:16px}
+    .sb-body{padding:12px;overflow:auto;flex:1}
+    .group{margin-top:8px;margin-bottom:6px;color:var(--muted);font-size:12px;padding:8px 4px}
+    .list{display:flex;flex-direction:column;gap:6px}
+    .item{padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+    .item:hover{background:#f2f6ff}
+    .item.active{background:#e8f2ff;border-color:#d9eaff;font-weight:600}
+    .controls{display:flex;gap:8px}
+    .btn{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
 
-    .content{padding:16px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+    /* Main */
+    .main{flex:1;padding:18px;overflow:auto}
+    .window{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px var(--shadow);overflow:hidden;max-width:1100px;margin:0 auto}
+    .titlebar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:linear-gradient(to bottom,#fbfbfd,#eef0f3)}
+    .dot{width:12px;height:12px;border-radius:50%}
+    .dot.red{background:var(--red)}
+    .dot.yellow{background:var(--yellow)}
+    .dot.green{background:var(--green)}
+    .title{flex:1;text-align:left;font-size:15px;font-weight:600}
+    .title[contenteditable]{outline: none;}
 
-    /* Iframe host for tools */
-    .tool-host{height:calc(100dvh - 92px);min-height:420px}
-    .tool-host iframe{width:100%;height:100%;border:0;border-radius:16px;background:#0f1216}
+    .inner{display:grid;grid-template-columns:1fr 420px;gap:12px;padding:14px}
+    .panel{background:transparent}
+    .editor{display:flex;flex-direction:column;height:520px;border-radius:10px;border:1px solid var(--line);overflow:hidden}
+    .editor textarea{flex:1;padding:12px;border:0;resize:vertical;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;font-size:13px}
+    .toolbar{display:flex;gap:8px;padding:8px;border-bottom:1px solid var(--line);background:#fafafa}
+    .preview{height:420px;border-radius:8px;border:1px solid var(--line);overflow:hidden}
+    .preview iframe{width:100%;height:100%;border:0}
+
+    .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .small{font-size:12px;color:var(--muted)}
+
+    /* Projects list style small */
+    .project-item{padding:8px;border-radius:8px;border:1px dashed var(--line);cursor:pointer}
 
     /* Responsive */
-    .menu-btn{display:none}
-    @media (max-width:900px){
-      .wrap{grid-template-columns:1fr}
-      .side{position:fixed;inset:0 40% 0 0;transform:translateX(-100%);transition:transform .25s ease;z-index:40}
-      .side.open{transform:translateX(0)}
-      .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:30;display:none}
-      .overlay.show{display:block}
-      .menu-btn{display:inline-flex}
+    @media (max-width: 980px){
+      .inner{grid-template-columns:1fr}
+      .editor{height:420px}
     }
-    footer{padding:14px 16px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;background:#0f172a;border:1px solid #1f2a3d}
+
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- Sidebar -->
-    <aside class="side" id="sidebar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1>Phúc Bùi – Tools</h1>
-          <div class="muted">Chạy trên GitHub Pages</div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sb-head">
+        <h1>Phúc Bùi – Tools</h1>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="importBtn" title="Import JSON">Import</button>
+          <button class="btn" id="exportBtn" title="Export JSON">Export</button>
         </div>
       </div>
-      <nav class="nav">
-        <div class="group">Danh mục</div>
-        <button class="active" data-route="home">
-          <span>Trang chủ</span>
-          <span class="pill">/</span>
-        </button>
-        <button data-route="2d-timeline">
-          <span>Thời Gian Khai Triển 2D</span>
-          <span class="tag">Tool</span>
-        </button>
-        <button data-route="bo-sung">
-          <span>Tool khác (trống)</span>
-          <span class="pill">soon</span>
-        </button>
-      </nav>
+
+      <div class="sb-body">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:700">Tools</div>
+          <div class="controls">
+            <button class="btn" id="newToolBtn">+ Tool</button>
+          </div>
+        </div>
+        <div class="list" id="toolsList" style="margin-top:8px"></div>
+
+        <div class="group">Dự án</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-weight:700">Projects</div>
+          <button class="btn" id="newProjectBtn">+ Project</button>
+        </div>
+        <div class="list" id="projectsList"></div>
+
+      </div>
     </aside>
 
-    <!-- Main -->
     <main class="main">
-      <div class="top">
-        <div class="title">
-          <button class="btn menu-btn" id="menuBtn">☰</button>
-          <h2 id="pageTitle">Trang chủ</h2>
+      <div class="window" id="windowRoot">
+        <div class="titlebar">
+          <div class="dot red"></div>
+          <div class="dot yellow"></div>
+          <div class="dot green"></div>
+          <div class="title" id="itemTitle" contenteditable="true" title="Click để đổi tên">Trang chủ</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="saveBtn">Lưu</button>
+            <button class="btn" id="deleteBtn">Xóa</button>
+          </div>
         </div>
-        <div class="actions">
-          <a class="btn" href="https://github.com/new" target="_blank" rel="noreferrer">New repo</a>
-          <a class="btn acc" id="howToBtn" href="#home">Hướng dẫn</a>
-        </div>
-      </div>
 
-      <div class="content">
-        <!-- Home -->
-        <section class="card" id="view-home" style="padding:16px 16px 0">
-          <h3 style="margin:0 0 8px">Kho công cụ cá nhân</h3>
-          <p class="muted" style="margin:0 0 14px">Dùng online, lưu localStorage, triển khai cực nhẹ trên GitHub Pages. Mỗi tool có thể là 1 file độc lập (HTML) hoặc nhúng trực tiếp.</p>
-          <ol style="margin:0 0 16px 18px;line-height:1.7">
-            <li><b>Tạo repo</b> trên GitHub (ví dụ: <code>phucbui-tools</code>). Bật <b>Settings → Pages → Deploy from branch</b>, chọn nhánh <code>main</code> và thư mục <code>/root</code>.</li>
-            <li><b>Tải lên</b> file <code>index.html</code> này và file tool của bạn <code>2D_Timeline_V8.html</code> vào cùng thư mục.</li>
-            <li>Truy cập đường dẫn Pages (dạng <code>https://&lt;username&gt;.github.io/&lt;repo&gt;/</code>). Tab "Thời Gian Khai Triển 2D" sẽ <b>nhúng trực tiếp</b> file của bạn.</li>
-            <li>Thêm tool mới: sao chép 1 file HTML khác (ví dụ <code>my_tool.html</code>) và thêm 1 nút trong sidebar (xem phần <code>// TODO: thêm route mới</code> ở dưới).</li>
-          </ol>
-          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
-            <div class="card" style="padding:14px">
-              <div class="muted">Tổng quát</div>
-              <div style="font-weight:700;margin-top:4px">Single-Page • Nhanh • Dark UI</div>
-            </div>
-            <div class="card" style="padding:14px">
-              <div class="muted">Triển khai</div>
-              <div style="font-weight:700;margin-top:4px">Thuần HTML/CSS/JS – không cần build</div>
-            </div>
-            <div class="card" style="padding:14px">
-              <div class="muted">Riêng tư</div>
-              <div style="font-weight:700;margin-top:4px">Dữ liệu lưu cục bộ (localStorage)</div>
+        <div class="inner">
+          <div class="panel">
+            <div class="meta">Nội dung tool (dán HTML/JS/CSS vào ô bên phải). Sau đó bấm <b>Render</b> để xem.</div>
+            <div class="editor">
+              <div class="toolbar">
+                <button class="btn" id="renderBtn">Render</button>
+                <button class="btn" id="saveContentBtn">Lưu nội dung</button>
+                <button class="btn" id="clearBtn">Xóa nội dung</button>
+                <div style="flex:1"></div>
+                <div class="small">Lưu tự động vào localStorage</div>
+              </div>
+              <textarea id="htmlEditor" placeholder="Dán code HTML/JS/CSS của tool vào đây (ví dụ copy toàn bộ body hay file HTML)." spellcheck="false"></textarea>
             </div>
           </div>
-          <footer>
-            <span>© <span id="year"></span> Phúc Bùi.</span>
-            <span style="float:right">Powered by GitHub Pages</span>
-          </footer>
-        </section>
 
-        <!-- Tool: 2D Timeline (nhúng chính file bạn đã có) -->
-        <section class="tool-host" id="view-2d-timeline" hidden>
-          <!-- Nếu file 2D_Timeline_V8.html nằm cùng thư mục với index.html thì đường dẫn dưới đây hoạt động ngay. -->
-          <iframe src="2D_Timeline_V8.html" title="Thời Gian Khai Triển 2D" loading="lazy"></iframe>
-        </section>
+          <div>
+            <div class="meta">Xem trước</div>
+            <div class="preview" id="previewWrap">
+              <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+              <div class="small">ID: <span id="itemId" class="small muted">-</span></div>
+              <div style="flex:1"></div>
+              <div class="small">Trạng thái: <span id="status" class="small muted">ready</span></div>
+            </div>
+          </div>
+        </div>
 
-        <!-- Placeholder tool -->
-        <section class="card" id="view-bo-sung" hidden style="padding:16px">
-          <h3 style="margin:0 0 8px">Tool trống</h3>
-          <p class="muted">Thêm file HTML mới (ví dụ <code>my_tool.html</code>) rồi đổi đoạn iframe theo tên file bạn đặt.</p>
-          <pre style="background:#0d131a;border:1px solid #1f2937;border-radius:10px;padding:12px;white-space:pre-wrap">&lt;section class="tool-host" id="view-my-tool" hidden&gt;
-  &lt;iframe src="my_tool.html"&gt;&lt;/iframe&gt;
-&lt;/section&gt;</pre>
-        </section>
       </div>
     </main>
   </div>
 
-  <div class="overlay" id="overlay"></div>
+  <input type="file" id="fileImport" accept="application/json" style="display:none" />
 
   <script>
-    // ======= Mini router bằng hash =======
-    const routes = {
-      'home': {title: 'Trang chủ', el: document.getElementById('view-home')},
-      '2d-timeline': {title: 'Thời Gian Khai Triển 2D', el: document.getElementById('view-2d-timeline')},
-      'bo-sung': {title: 'Tool khác (trống)', el: document.getElementById('view-bo-sung')},
-      // TODO: thêm route mới theo mẫu: 'my-tool': {title:'Tên tool', el: document.getElementById('view-my-tool')}
-    };
+    // ======= Data model (localStorage) =======
+    // Structure:
+    // {
+    //   tools: [{id, title, content}],
+    //   projects: [{id, title, content}],
+    //   active: {type: 'tool'|'project', id}
+    // }
 
-    const pageTitle = document.getElementById('pageTitle');
-    const navButtons = Array.from(document.querySelectorAll('.nav button'));
+    const STORAGE_KEY = 'phuc_tools_v1';
 
-    function setActive(route){
-      // Ẩn/hiện view
-      Object.entries(routes).forEach(([k,v])=>{ v.el.hidden = (k!==route); });
-      // Cập nhật tiêu đề
-      pageTitle.textContent = routes[route]?.title || 'Trang chủ';
-      // Active nav
-      navButtons.forEach(btn=>btn.classList.toggle('active', btn.dataset.route===route));
-      // Đóng sidebar (mobile)
-      sidebar.classList.remove('open'); overlay.classList.remove('show');
-      // Lưu trạng thái
-      localStorage.setItem('activeRoute', route);
+    function uid(prefix='id'){return prefix + '_' + Math.random().toString(36).slice(2,9)}
+
+    function loadState(){
+      try{const s = localStorage.getItem(STORAGE_KEY); return s? JSON.parse(s): {tools:[], projects:[], active:{type:'tool', id:null}}}catch(e){console.error(e); return {tools:[],projects:[],active:{type:'tool',id:null}}}
+    }
+    function saveState(state){localStorage.setItem(STORAGE_KEY, JSON.stringify(state))}
+
+    let state = loadState();
+
+    // Initialize with sample home tool if empty
+    function initDefaults(){
+      if(state.tools.length===0 && state.projects.length===0){
+        const t = {id:uid('tool'), title:'Thời Gian Khai Triển 2D (paste code vào)', content:'<p>Chèn code tool tại đây.</p>'};
+        state.tools.push(t);
+        state.active = {type:'tool', id:t.id};
+        saveState(state);
+      }
     }
 
-    function parseHash(){
-      const hash = location.hash.replace('#','');
-      const route = hash || localStorage.getItem('activeRoute') || 'home';
-      return route;
+    initDefaults();
+
+    // ======= UI refs =======
+    const toolsList = document.getElementById('toolsList');
+    const projectsList = document.getElementById('projectsList');
+    const newToolBtn = document.getElementById('newToolBtn');
+    const newProjectBtn = document.getElementById('newProjectBtn');
+    const itemTitle = document.getElementById('itemTitle');
+    const itemId = document.getElementById('itemId');
+    const htmlEditor = document.getElementById('htmlEditor');
+    const renderBtn = document.getElementById('renderBtn');
+    const saveContentBtn = document.getElementById('saveContentBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const previewFrame = document.getElementById('previewFrame');
+    const status = document.getElementById('status');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const fileImport = document.getElementById('fileImport');
+
+    // ======= Render sidebar =======
+    function renderSidebar(){
+      toolsList.innerHTML = '';
+      state.tools.forEach(t=>{
+        const el = document.createElement('div');
+        el.className = 'item' + (state.active.type==='tool' && state.active.id===t.id ? ' active' : '');
+        el.textContent = t.title;
+        el.title = 'Click để mở. Double-click để đổi tên.';
+        el.addEventListener('click', ()=> openItem('tool', t.id));
+        el.addEventListener('dblclick', ()=> renameItemInline('tool', t.id, el));
+        toolsList.appendChild(el);
+      });
+
+      projectsList.innerHTML = '';
+      state.projects.forEach(p=>{
+        const el = document.createElement('div');
+        el.className = 'project-item' + (state.active.type==='project' && state.active.id===p.id ? ' active' : '');
+        el.textContent = p.title;
+        el.addEventListener('click', ()=> openItem('project', p.id));
+        el.addEventListener('dblclick', ()=> renameItemInline('project', p.id, el));
+        projectsList.appendChild(el);
+      });
     }
 
-    window.addEventListener('hashchange', ()=> setActive(parseHash()));
+    function renameItemInline(type,id,element){
+      const list = type==='tool'? state.tools : state.projects;
+      const item = list.find(x=>x.id===id);
+      if(!item) return;
+      const input = document.createElement('input');
+      input.value = item.title;
+      input.style.width = '100%';
+      input.style.padding = '6px';
+      element.innerHTML = '';
+      element.appendChild(input);
+      input.focus();
+      input.select();
+      input.addEventListener('blur', ()=>{ item.title = input.value || 'Untitled'; saveState(state); renderSidebar(); });
+      input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ input.blur(); } });
+    }
 
-    // Nav click → đổi hash
-    navButtons.forEach(btn=>btn.addEventListener('click',()=>{
-      location.hash = btn.dataset.route;
-    }));
+    // ======= Open item =======
+    function openItem(type,id){
+      state.active = {type, id};
+      saveState(state);
+      renderSidebar();
+      const list = type==='tool'? state.tools : state.projects;
+      const item = list.find(x=>x.id===id);
+      if(!item) return;
+      itemTitle.textContent = item.title;
+      itemId.textContent = item.id;
+      htmlEditor.value = item.content || '';
+      previewFrame.srcdoc = item.content || '<p>Preview</p>';
+    }
 
-    // Sidebar toggle (mobile)
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    document.getElementById('menuBtn')?.addEventListener('click', ()=>{
-      sidebar.classList.add('open'); overlay.classList.add('show');
+    // ======= Create new =======
+    newToolBtn.addEventListener('click', ()=>{
+      const t = {id:uid('tool'), title:'New Tool', content:'<p>Chèn code ở đây.</p>'};
+      state.tools.unshift(t);
+      state.active = {type:'tool', id:t.id};
+      saveState(state); renderSidebar(); openItem('tool', t.id);
     });
-    overlay.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overlay.classList.remove('show'); });
 
-    // Năm footer
-    document.getElementById('year').textContent = new Date().getFullYear();
+    newProjectBtn.addEventListener('click', ()=>{
+      const p = {id:uid('proj'), title:'New Project', content:'<p>Mô tả dự án</p>'};
+      state.projects.unshift(p);
+      state.active = {type:'project', id:p.id};
+      saveState(state); renderSidebar(); openItem('project', p.id);
+    });
 
-    // Khởi tạo
-    setActive(parseHash());
+    // ======= Save title (inline) =======
+    itemTitle.addEventListener('blur', ()=>{
+      const active = state.active; if(!active.id) return;
+      const list = active.type==='tool'? state.tools : state.projects;
+      const item = list.find(x=>x.id===active.id);
+      if(!item) return;
+      item.title = itemTitle.textContent.trim() || 'Untitled';
+      saveState(state); renderSidebar();
+    });
+
+    itemTitle.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); itemTitle.blur(); } });
+
+    // ======= Render preview & save content =======
+    renderBtn.addEventListener('click', ()=>{
+      previewFrame.srcdoc = htmlEditor.value || '<p>Preview</p>'; status.textContent = 'rendered';
+    });
+
+    saveContentBtn.addEventListener('click', ()=>{
+      const active = state.active; if(!active.id) return;
+      const list = active.type==='tool'? state.tools : state.projects;
+      const item = list.find(x=>x.id===active.id);
+      if(!item) return;
+      item.content = htmlEditor.value;
+      saveState(state);
+      status.textContent = 'saved';
+      renderSidebar();
+    });
+
+    saveBtn.addEventListener('click', ()=>{ saveContentBtn.click(); alert('Đã lưu.'); });
+
+    clearBtn.addEventListener('click', ()=>{ if(confirm('Xóa nội dung hiện tại?')){ htmlEditor.value = ''; previewFrame.srcdoc = '<p>Preview</p>'; status.textContent = 'cleared'; } });
+
+    deleteBtn.addEventListener('click', ()=>{
+      if(!state.active.id) return; if(!confirm('Xóa item này?')) return;
+      const {type,id} = state.active;
+      if(type==='tool') state.tools = state.tools.filter(t=>t.id!==id); else state.projects = state.projects.filter(p=>p.id!==id);
+      // set new active
+      const next = state.tools[0] || state.projects[0];
+      if(next){ if(state.tools.find(t=>t.id===next.id)) state.active = {type:'tool', id:next.id}; else state.active = {type:'project', id:next.id}; }
+      else state.active = {type:'tool', id:null};
+      saveState(state);
+      renderSidebar();
+      if(state.active.id) openItem(state.active.type, state.active.id); else { itemTitle.textContent='Trang chủ'; itemId.textContent='-'; htmlEditor.value=''; previewFrame.srcdoc='<p>Preview</p>'; }
+    });
+
+    // ======= Export / Import =======
+    exportBtn.addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'phuc-tools-backup.json'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click', ()=> fileImport.click());
+    fileImport.addEventListener('change', ()=>{
+      const f = fileImport.files[0]; if(!f) return; const reader = new FileReader(); reader.onload = e=>{
+        try{ const imported = JSON.parse(e.target.result); if(imported.tools && imported.projects){ state = imported; saveState(state); renderSidebar(); if(state.active.id) openItem(state.active.type, state.active.id); alert('Import thành công'); } else alert('File không hợp lệ'); }
+        catch(err){alert('Import lỗi: '+err.message)}
+      }; reader.readAsText(f);
+    });
+
+    // ======= Init =======
+    renderSidebar();
+    if(state.active && state.active.id){ openItem(state.active.type, state.active.id); }
+
+    // Auto-save content while typing (throttle)
+    let typingTimer = null;
+    htmlEditor.addEventListener('input', ()=>{
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(()=>{
+        const active = state.active; if(!active.id) return;
+        const list = active.type==='tool'? state.tools : state.projects;
+        const item = list.find(x=>x.id===active.id);
+        if(!item) return; item.content = htmlEditor.value; saveState(state); status.textContent = 'auto-saved';
+      }, 800);
+    });
+
+    // Keyboard shortcuts: Ctrl/Cmd+S to save content
+    window.addEventListener('keydown', (e)=>{
+      if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); saveContentBtn.click(); }
+    });
+
   </script>
 </body>
 </html>
