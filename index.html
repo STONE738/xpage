@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timeline Dự Án - V11</title>
+  <style>
+    :root{
+      --bg:#0b0d10;--card:#12161b;--muted:#6b7280;--txt:#e5e7eb;
+      --acc:#22c55e;--acc2:#38bdf8;--warn:#f59e0b;--err:#ef4444;--ok:#10b981
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--txt);
+      font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    .container{max-width:1000px;margin:24px auto;padding:0 16px}
+    h1{font-size:24px;margin:0 0 12px}
+    .muted{color:var(--muted)}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:16px;
+      padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:16px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    input,select{background:#0f1216;border:1px solid #334155;color:var(--txt);
+      border-radius:10px;padding:8px 10px}
+    input[type=number]{max-width:160px}
+    label{display:block;margin-bottom:6px}
+    button{background:#1f2937;color:var(--txt);border:1px solid #334155;
+      border-radius:12px;padding:10px 14px;cursor:pointer}
+    button:hover{background:#0f172a}
+    .btn.acc{background:var(--acc);border-color:transparent;color:#052e16}
+    .btn.acc:hover{filter:brightness(0.95)}
+    .btn.ghost{background:transparent;border-color:#334155}
+    .kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .kpi .item{background:#0d131a;border:1px solid #1e293b;border-radius:14px;padding:12px}
+    .sum{font-weight:700;font-size:18px;margin-top:4px}
+    .progress{background:#1e293b;border-radius:8px;height:14px;overflow:hidden;margin-top:8px}
+    .progress-bar{background:var(--acc);height:100%;width:0%;transition:width .4s}
+    .footer-note{font-size:13px;color:var(--muted);margin-top:12px}
+    @media (max-width:700px){.kpi{grid-template-columns:repeat(1,minmax(0,1fr))}}
+
+    /* Tabs */
+    .tabs{display:flex;gap:6px;margin-bottom:16px}
+    .tab{background:#1f2937;border:1px solid #334155;color:#e5e7eb;
+         padding:8px 14px;border-radius:8px;cursor:pointer}
+    .tab.active{background:var(--acc);color:#052e16}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+
+    .hint{color:var(--warn);font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Timeline Dự Án</h1>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="showTab(event,'tab2d')">2D</button>
+      <button class="tab" onclick="showTab(event,'tab3d')">3D</button>
+      <button class="tab" onclick="showTab(event,'tabtc')">Thi công</button>
+    </div>
+
+    <!-- Tab 2D -->
+    <div id="tab2d" class="tab-content active">
+      <!-- Thiết lập -->
+      <details class="card">
+        <summary style="cursor:pointer"><b>Thiết lập thông số (chỉ cho 2D)</b></summary>
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label>Giá 2D công ty (VNĐ/m²)</label>
+            <input type="number" id="cfg2D" value="72000">
+          </div>
+          <div>
+            <label>Đơn giá Outsource (mặc định = 80% giá 2D)</label>
+            <input type="number" id="cfgOutsource" readonly>
+          </div>
+          <div>
+            <label>Ngày công chuẩn / tháng</label>
+            <input type="number" id="cfgDays" value="25">
+          </div>
+          <div>
+            <label>% cộng thêm Extra</label>
+            <input type="number" id="cfgExtra" value="10">
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <small class="muted">Ghi chú: 2D tab giờ chỉ chứa cấu hình giá 2D. Chi phí gửi khách đã ẩn (tự lấy = diện tích * giá 2D).</small>
+        </div>
+      </details>
+
+      <!-- Form nhập liệu -->
+      <div class="card">
+        <div>
+          <label>Loại công trình</label>
+          <select id="buildingType" style="width:100%">
+            <option value="canho">Căn hộ</option>
+            <option value="nhapho">Nhà phố</option>
+            <option value="bietthu">Biệt thự</option>
+            <option value="dichvu">Dịch vụ (spa, quán ăn...)</option>
+          </select>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Phong cách thiết kế</label>
+          <select id="designStyle" style="width:100%">
+            <option value="hiendai">Hiện đại</option>
+            <option value="bancodien">Bán cổ điển</option>
+            <option value="khac">Khác</option>
+          </select>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label>Số tầng thiết kế</label>
+            <input type="number" id="floors" min="1" value="1" />
+          </div>
+          <div>
+            <label>Diện tích mỗi tầng (m²)</label>
+            <input type="number" id="area" min="1" value="30" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Phạm vi công việc (bắt buộc chọn ít nhất 1)</label>
+          <label><input type="checkbox" id="fitout"> Fitout</label>
+          <label><input type="checkbox" id="fur"> Furniture</label>
+          <label><input type="checkbox" id="extra"> + Extra</label>
+        </div>
+
+        <div style="margin-top:12px" class="row">
+          <div>
+            <label>Mức lương (triệu VNĐ/tháng / 1 nhân viên)</label>
+            <input type="number" id="salary" min="1" value="10" />
+          </div>
+          <div>
+            <label>Năng suất 1 nhân viên (m²/ngày)</label>
+            <input type="number" id="cfgProd" min="1" value="10" />
+          </div>
+          <div>
+            <label>Số nhân viên nội bộ</label>
+            <input type="number" id="cfgStaff" min="1" value="1" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="row">
+          <div>
+            <label>Năng suất 1 tổ outsource (m²/ngày)</label>
+            <input type="number" id="cfgOutProd" min="1" value="30" />
+          </div>
+          <div>
+            <label>Số tổ outsource</label>
+            <input type="number" id="cfgOutTeams" min="1" value="1" />
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Kết quả KPI -->
+      <div class="kpi">
+        <div class="item">
+          <div class="muted">Tổng diện tích</div>
+          <div class="sum" id="totalArea">0 m²</div>
+        </div>
+        <div class="item">
+          <div class="muted">Doanh thu (công ty)</div>
+          <div class="sum" id="totalRevenue">0 triệu VNĐ</div>
+        </div>
+        <div class="item">
+          <div class="muted">Thời gian (nội bộ)
+          </div>
+          <div class="sum" id="internalDays">-</div>
+          <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+        </div>
+      </div>
+
+      <div class="kpi" style="margin-top:12px">
+        <div class="item">
+          <div class="muted">Thời gian (outsource)</div>
+          <div class="sum" id="outsourceDays">-</div>
+        </div>
+        <div class="item">
+          <div class="muted">Chi phí outsource</div>
+          <div class="sum" id="outsourceCost">0 triệu VNĐ</div>
+        </div>
+        <div class="item">
+          <div class="muted">Lợi nhuận (nội bộ / outsource)</div>
+          <div class="sum" id="profit">- / - triệu VNĐ</div>
+        </div>
+      </div>
+
+      <!-- Nút -->
+      <div style="margin-top:16px">
+        <button class="btn acc" id="exportBtn" onclick="exportFile()">Xuất File</button>
+      </div>
+
+      <div class="footer-note">
+        * Thời gian kiểm soát theo <b>số người</b> và <b>năng suất (m²/ngày)</b>.
+      </div>
+    </div>
+
+    <!-- Tab 3D -->
+    <div id="tab3d" class="tab-content">
+      <div class="card">
+        <h3>Thiết kế 3D (sẽ cập nhật sau)</h3>
+        <div class="muted">Khung tính toán cho 3D sẽ đặt tại đây.</div>
+      </div>
+    </div>
+
+    <!-- Tab Thi công -->
+    <div id="tabtc" class="tab-content">
+      <div class="card">
+        <h3>Thi công (sẽ cập nhật sau)</h3>
+        <div class="muted">Khung tính toán cho thi công sẽ đặt tại đây.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function formatMillion(v){ return (v/1000000).toFixed(2) + " triệu VNĐ" }
+
+function calculateAll() {
+  const floors = parseFloat(document.getElementById('floors').value) || 0;
+  const areaPerFloor = parseFloat(document.getElementById('area').value) || 0;
+  const totalArea = floors * areaPerFloor;
+  document.getElementById('totalArea').textContent = totalArea + " m²";
+
+  const fitout = document.getElementById('fitout').checked;
+  const fur = document.getElementById('fur').checked;
+  const extra = document.getElementById('extra').checked;
+
+  // Nếu chưa chọn phạm vi -> không tính
+  if (!fitout && !fur && !extra) {
+    document.getElementById('totalRevenue').textContent = "Vui lòng chọn phạm vi công việc";
+    document.getElementById('internalDays').textContent = "-";
+    document.getElementById('outsourceDays').textContent = "-";
+    document.getElementById('outsourceCost').textContent = "-";
+    document.getElementById('profit').textContent = "- / - triệu VNĐ";
+    document.getElementById('progressBar').style.width = "0%";
+    document.getElementById('exportBtn').disabled = true;
+    return;
+  }
+
+  document.getElementById('exportBtn').disabled = false;
+
+  const price2D = parseFloat(document.getElementById('cfg2D').value) || 0; // VNĐ/m2
+  const outRate = Math.round(price2D * 0.8);
+  document.getElementById('cfgOutsource').value = outRate;
+
+  // Doanh thu tính theo diện tích * giá 2D (theo yêu cầu: chi phí gửi khách = diện tích * đơn giá công ty)
+  const revenue = totalArea * price2D;
+
+  // Chi phí outsource
+  const outsourceCost = totalArea * outRate;
+
+  // Thời gian tính theo năng suất
+  const prod = parseFloat(document.getElementById('cfgProd').value) || 1; // m2/ngày/người
+  const staff = Math.max(1, parseInt(document.getElementById('cfgStaff').value) || 1);
+  const outProd = Math.max(1, parseFloat(document.getElementById('cfgOutProd').value) || 1); // m2/ngày/tổ
+  const outTeams = Math.max(1, parseInt(document.getElementById('cfgOutTeams').value) || 1);
+
+  const internalDays = totalArea > 0 ? Math.ceil(totalArea / (prod * staff)) : 0;
+  const outsourceDays = totalArea > 0 ? Math.ceil(totalArea / (outProd * outTeams)) : 0;
+
+  const salary = parseFloat(document.getElementById('salary').value) || 0; // triệu / tháng
+  const daysInMonth = parseFloat(document.getElementById('cfgDays').value) || 25;
+
+  // Chi phí nhân công nội bộ tính theo số ngày * (lương/ngày) * số nhân viên
+  const dailySalaryVND = (salary * 1000000) / daysInMonth;
+  const internalLaborCost = dailySalaryVND * internalDays * staff;
+
+  const profitInternal = revenue - internalLaborCost;
+  const profitOutsource = revenue - outsourceCost;
+
+  // Nếu có extra, tăng thời gian nội bộ theo %
+  const extraPct = parseFloat(document.getElementById('cfgExtra').value) || 0;
+  let internalDaysAdjusted = internalDays;
+  if (extra) {
+    internalDaysAdjusted = Math.ceil(internalDays * (1 + extraPct/100));
+  }
+
+  document.getElementById('totalRevenue').textContent = formatMillion(revenue);
+  document.getElementById('outsourceCost').textContent = formatMillion(outsourceCost);
+  document.getElementById('internalDays').textContent = internalDaysAdjusted + " ngày (" + staff + " NV)";
+  document.getElementById('outsourceDays').textContent = outsourceDays + " ngày (" + outTeams + " tổ)";
+
+  // Hiển thị lợi nhuận: nội bộ / outsource
+  document.getElementById('profit').textContent = formatMillion(profitInternal) + " / " + formatMillion(profitOutsource);
+
+  // Progress bar: nội bộ so với 30 ngày
+  const percent = Math.min(100, (internalDaysAdjusted/30)*100);
+  document.getElementById('progressBar').style.width = percent + "%";
+}
+
+function exportFile() {
+  const totalArea = document.getElementById('totalArea').textContent;
+  const totalRevenue = document.getElementById('totalRevenue').textContent;
+  const outsourceCost = document.getElementById('outsourceCost').textContent;
+  const profit = document.getElementById('profit').textContent;
+  const internalDays = document.getElementById('internalDays').textContent;
+  const outsourceDays = document.getElementById('outsourceDays').textContent;
+
+  const content = `Timeline 2D - Kết quả\n${totalArea}\nDoanh thu: ${totalRevenue}\nChi phí outsource: ${outsourceCost}\nLợi nhuận (nội bộ / outsource): ${profit}\nThời gian nội bộ: ${internalDays}\nThời gian outsource: ${outsourceDays}\n`;
+  const blob = new Blob([content], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'Timeline_2D_Result_V11.txt';
+  link.click();
+}
+
+function showTab(e,id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+[ 'floors','area','salary','fitout','fur','extra',
+  'cfg2D','cfgOutProd','cfgProd','cfgStaff','cfgOutTeams','cfgDays','cfgExtra']
+  .forEach(id => document.getElementById(id).addEventListener('input', calculateAll));
+
+// Khởi tạo
+calculateAll();
+</script>
+</body>
+</html>
