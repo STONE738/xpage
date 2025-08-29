@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thời Gian Khai Triển 2D</title>
+  <style>
+    :root{
+      --bg:#0b0d10;--card:#12161b;--muted:#6b7280;--txt:#e5e7eb;
+      --acc:#22c55e;--acc2:#38bdf8;--warn:#f59e0b;--err:#ef4444;--ok:#10b981
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--txt);
+      font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    .container{max-width:1000px;margin:24px auto;padding:0 16px}
+    h1{font-size:24px;margin:0 0 12px}
+    .muted{color:var(--muted)}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:16px;
+      padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:16px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    input,select{background:#0f1216;border:1px solid #334155;color:var(--txt);
+      border-radius:10px;padding:8px 10px}
+    input[type=number]{max-width:160px}
+    label{display:block;margin-bottom:6px}
+    button{background:#1f2937;color:var(--txt);border:1px solid #334155;
+      border-radius:12px;padding:10px 14px;cursor:pointer}
+    button:hover{background:#0f172a}
+    .btn.acc{background:var(--acc);border-color:transparent;color:#052e16}
+    .btn.acc:hover{filter:brightness(0.95)}
+    .btn.ghost{background:transparent;border-color:#334155}
+    .kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .kpi .item{background:#0d131a;border:1px solid #1e293b;border-radius:14px;padding:12px}
+    .sum{font-weight:700;font-size:18px;margin-top:4px}
+    .progress{background:#1e293b;border-radius:8px;height:14px;overflow:hidden;margin-top:8px}
+    .progress-bar{background:var(--acc);height:100%;width:0%;transition:width .4s}
+    .footer-note{font-size:13px;color:var(--muted);margin-top:12px}
+    @media (max-width:700px){.kpi{grid-template-columns:repeat(1,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Thời Gian Khai Triển 2D</h1>
+
+<!-- Form nhập liệu -->
+<div class="card">
+  <div>
+    <label>Loại công trình</label>
+    <select id="buildingType" style="width:100%">
+      <option value="canho">Căn hộ</option>
+      <option value="nhapho">Nhà phố</option>
+      <option value="bietthu">Biệt thự</option>
+      <option value="dichvu">Dịch vụ (spa, quán ăn...)</option>
+    </select>
+  </div>
+
+  <div style="margin-top:12px">
+    <label>Phong cách thiết kế</label>
+    <select id="designStyle" style="width:100%">
+      <option value="hiendai">Hiện đại</option>
+      <option value="bancodien">Bán cổ điển</option>
+      <option value="khac">Khác</option>
+    </select>
+  </div>
+
+  <div class="row" style="margin-top:12px">
+    <div>
+      <label>Số tầng thiết kế</label>
+      <input type="number" id="floors" min="1" value="1" />
+    </div>
+    <div>
+      <label>Diện tích mỗi tầng (m²)</label>
+      <input type="number" id="area" min="1" value="30" />
+    </div>
+  </div>
+
+  <div style="margin-top:12px">
+    <label>Phạm vi công việc</label>
+    <label><input type="checkbox" id="fitout"> Fitout</label>
+    <label><input type="checkbox" id="fur"> Fur</label>
+    <label><input type="checkbox" id="extra"> +10% Thời gian TK (Khối lượng & chi tiết nhiều)</label>
+  </div>
+
+  <div style="margin-top:12px">
+    <label>Năng lực (triệu VNĐ/tháng)</label>
+    <input type="number" id="salary" min="1" value="10" />
+  </div>
+</div>
+
+
+    <!-- Kết quả KPI -->
+    <div class="kpi">
+      <div class="item">
+        <div class="muted">Tổng diện tích</div>
+        <div class="sum" id="totalArea">0 m²</div>
+      </div>
+      <div class="item">
+        <div class="muted">Thù lao cơ sở</div>
+        <div class="sum" id="totalRevenue">0 triệu VNĐ</div>
+      </div>
+      <div class="item">
+        <div class="muted">Thời gian tối đa</div>
+        <div class="sum" id="breakevenDays">0 ngày</div>
+        <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- Nút xuất file -->
+    <div style="margin-top:16px">
+      <button class="btn acc" onclick="exportFile()">Xuất File</button>
+      <button class="btn ghost" onclick="calculateBreakevenDays()">Tính lại</button>
+      <button class="btn ghost" onclick="resetForm()">Reset</button>
+    </div>
+
+    <div class="footer-note">
+      * Thời gian trên tính theo <b>1 người triển khai</b>.
+    </div>
+  </div>
+
+<script>
+function calculateBreakevenDays() {
+  const floors = parseFloat(document.getElementById('floors').value);
+  const areaPerFloor = parseFloat(document.getElementById('area').value);
+  const totalArea = floors * areaPerFloor;
+  document.getElementById('totalArea').textContent = totalArea + " m²";
+
+  const salary = parseFloat(document.getElementById('salary').value);
+  const dailySalary = (salary * 1000000) / 25;
+
+  const fitout = document.getElementById('fitout').checked;
+  const fur = document.getElementById('fur').checked;
+  const extra = document.getElementById('extra').checked;
+
+  let pricePerM2 = 0;
+  if (fitout) pricePerM2 += 25000;
+  if (fur) pricePerM2 += 35000;
+
+  let totalRevenue = 0;
+  if (fitout || fur) totalRevenue = totalArea * pricePerM2;
+
+  let breakevenDaysValue = totalRevenue > 0 ? Math.round(totalRevenue / dailySalary * 10) / 10 : 0;
+  if (extra) {
+    breakevenDaysValue *= 1.1;
+    breakevenDaysValue = Math.round(breakevenDaysValue * 10) / 10;
+  }
+
+  document.getElementById('breakevenDays').textContent = breakevenDaysValue + " ngày";
+  document.getElementById('totalRevenue').textContent = (totalRevenue / 1000000).toFixed(2) + " triệu VNĐ";
+
+  // Progress bar: giả định 30 ngày là 100%
+  const percent = Math.min(100, (breakevenDaysValue/30)*100);
+  document.getElementById('progressBar').style.width = percent + "%";
+
+  saveData();
+}
+
+function exportFile() {
+  const breakevenDays = document.getElementById('breakevenDays').textContent;
+  const totalRevenue = document.getElementById('totalRevenue').textContent;
+  const totalArea = document.getElementById('totalArea').textContent;
+  const content = `Thời Gian Khai Triển 2D\n${totalArea}\nThù lao cơ sở: ${totalRevenue}\nThời gian tối đa: ${breakevenDays}\n* Thời gian trên tính theo 1 người triển khai.`;
+  const blob = new Blob([content], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'Timeline_2D_Result.txt';
+  link.click();
+}
+
+function saveData(){
+  const data = {
+    floors:document.getElementById('floors').value,
+    area:document.getElementById('area').value,
+    salary:document.getElementById('salary').value,
+    fitout:document.getElementById('fitout').checked,
+    fur:document.getElementById('fur').checked,
+    extra:document.getElementById('extra').checked,
+    buildingType:document.getElementById('buildingType').value,
+    designStyle:document.getElementById('designStyle').value
+  };
+  localStorage.setItem('timeline2d', JSON.stringify(data));
+}
+
+function loadData(){
+  const data = JSON.parse(localStorage.getItem('timeline2d')||'{}');
+  if(!data) return;
+  if(data.floors) document.getElementById('floors').value=data.floors;
+  if(data.area) document.getElementById('area').value=data.area;
+  if(data.salary) document.getElementById('salary').value=data.salary;
+  if(data.buildingType) document.getElementById('buildingType').value=data.buildingType;
+  if(data.designStyle) document.getElementById('designStyle').value=data.designStyle;
+  document.getElementById('fitout').checked=!!data.fitout;
+  document.getElementById('fur').checked=!!data.fur;
+  document.getElementById('extra').checked=!!data.extra;
+}
+
+function resetForm(){
+  localStorage.removeItem('timeline2d');
+  document.getElementById('floors').value=1;
+  document.getElementById('area').value=30;
+  document.getElementById('salary').value=10;
+  document.getElementById('buildingType').value="canho";
+  document.getElementById('designStyle').value="hiendai";
+  document.getElementById('fitout').checked=false;
+  document.getElementById('fur').checked=false;
+  document.getElementById('extra').checked=false;
+  calculateBreakevenDays();
+}
+
+['floors','area','salary','fitout','fur','extra','buildingType','designStyle']
+  .forEach(id => document.getElementById(id).addEventListener('input', calculateBreakevenDays));
+
+loadData();
+calculateBreakevenDays();
+</script>
+</body>
+</html>
