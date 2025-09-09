@@ -3,343 +3,448 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Phúc Bùi – Tools & Projects</title>
-  <meta name="description" content="Kho công cụ cá nhân – macOS style, thêm tool trực tiếp, quản lý dự án." />
+  <title>Thời Gian Khai Triển 2D — Fixed</title>
   <style>
     :root{
-      --bg:#f5f5f7;--txt:#1c1c1e;--muted:#6e6e73;--line:#d2d2d7;
-      --card:#fff;--shadow:rgba(0,0,0,.12);
-      --accent:#007aff;--accent-2:#0ea5e9;
-      --red:#ff5f57;--yellow:#febc2e;--green:#28c840;
+      --bg:#0b0d10;--card:#12161b;--muted:#6b7280;--txt:#e5e7eb;
+      --acc:#22c55e;--acc2:#38bdf8;--warn:#f59e0b;--err:#ef4444;--ok:#10b981
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--txt);}
-
-    /* Layout */
-    .app{display:flex;gap:0;height:100vh}
-    .sidebar{width:280px;background:linear-gradient(180deg,#fff,#fbfbfd);border-right:1px solid var(--line);display:flex;flex-direction:column}
-    .sb-head{padding:18px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
-    .sb-head h1{font-size:16px}
-    .sb-body{padding:12px;overflow:auto;flex:1}
-    .group{margin-top:8px;margin-bottom:6px;color:var(--muted);font-size:12px;padding:8px 4px}
-    .list{display:flex;flex-direction:column;gap:6px}
-    .item{padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent}
-    .item:hover{background:#f2f6ff}
-    .item.active{background:#e8f2ff;border-color:#d9eaff;font-weight:600}
-    .controls{display:flex;gap:8px}
-    .btn{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
-    .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
-
-    /* Main */
-    .main{flex:1;padding:18px;overflow:auto}
-    .window{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px var(--shadow);overflow:hidden;max-width:1100px;margin:0 auto}
-    .titlebar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:linear-gradient(to bottom,#fbfbfd,#eef0f3)}
-    .dot{width:12px;height:12px;border-radius:50%}
-    .dot.red{background:var(--red)}
-    .dot.yellow{background:var(--yellow)}
-    .dot.green{background:var(--green)}
-    .title{flex:1;text-align:left;font-size:15px;font-weight:600}
-    .title[contenteditable]{outline: none;}
-
-    .inner{display:grid;grid-template-columns:1fr 420px;gap:12px;padding:14px}
-    .panel{background:transparent}
-    .editor{display:flex;flex-direction:column;height:520px;border-radius:10px;border:1px solid var(--line);overflow:hidden}
-    .editor textarea{flex:1;padding:12px;border:0;resize:vertical;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;font-size:13px}
-    .toolbar{display:flex;gap:8px;padding:8px;border-bottom:1px solid var(--line);background:#fafafa}
-    .preview{height:420px;border-radius:8px;border:1px solid var(--line);overflow:hidden}
-    .preview iframe{width:100%;height:100%;border:0}
-
-    .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
-    .small{font-size:12px;color:var(--muted)}
-
-    /* Projects list style small */
-    .project-item{padding:8px;border-radius:8px;border:1px dashed var(--line);cursor:pointer}
-
-    /* Responsive */
-    @media (max-width: 980px){
-      .inner{grid-template-columns:1fr}
-      .editor{height:420px}
-    }
-
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--txt);
+      font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    .container{max-width:1000px;margin:24px auto;padding:0 16px}
+    h1{font-size:24px;margin:0 0 12px}
+    .muted{color:var(--muted)}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:16px;
+      padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.25);margin-bottom:16px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    input,select{background:#0f1216;border:1px solid #334155;color:var(--txt);
+      border-radius:10px;padding:8px 10px;flex:1}
+    input[type=number]{max-width:80px}
+    label{display:block;margin-bottom:6px}
+    .kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .kpi .item{background:#0d131a;border:1px solid #1e293b;border-radius:14px;padding:12px}
+    .sum{font-weight:700;font-size:18px;margin-top:4px}
+    .progress{background:#1e293b;border-radius:8px;height:14px;overflow:hidden;margin-top:8px}
+    .progress-bar{background:var(--acc);height:100%;width:0%;transition:width .4s}
+    .footer-note{font-size:13px;color:var(--muted);margin-top:12px}
+    @media (max-width:900px){.row{flex-direction:column}}
+    .tabs {display:flex;gap:12px;margin-bottom:16px}
+    .tab-btn {flex:1;text-align:center;padding:10px;border-radius:12px;cursor:pointer;background:#1f2937;border:1px solid #334155}
+    .tab-btn.active{background:var(--acc);color:#052e16;border-color:transparent}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .scope-item {display:flex;align-items:center;gap:12px;margin-bottom:6px}
+    .scope-item label {margin:0;display:flex;align-items:center;gap:8px}
+    .scope-sub {display:flex;align-items:center;gap:8px}
+    .scope-sub input[type=number]{width:80px}
+    input[type=checkbox]{margin:0}
+    .scope-item .label-text{min-width:110px}
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="sb-head">
-        <h1>Phúc Bùi – Tools</h1>
-        <div style="display:flex;gap:8px">
-          <button class="btn" id="importBtn" title="Import JSON">Import</button>
-          <button class="btn" id="exportBtn" title="Export JSON">Export</button>
-        </div>
-      </div>
+  <div class="container">
+    <h1>Thời Gian Khai Triển 2D</h1>
 
-      <div class="sb-body">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-weight:700">Tools</div>
-          <div class="controls">
-            <button class="btn" id="newToolBtn">+ Tool</button>
-          </div>
-        </div>
-        <div class="list" id="toolsList" style="margin-top:8px"></div>
+    <div class="tabs" role="tablist">
+      <div class="tab-btn active" data-tab="bvtk" role="tab">BVTK</div>
+      <div class="tab-btn" data-tab="bvtc" role="tab">BVTC</div>
+      <div class="tab-btn" data-tab="fur" role="tab">Chỉ làm Fur</div>
+    </div>
 
-        <div class="group">Dự án</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-weight:700">Projects</div>
-          <button class="btn" id="newProjectBtn">+ Project</button>
-        </div>
-        <div class="list" id="projectsList"></div>
-
-      </div>
-    </aside>
-
-    <main class="main">
-      <div class="window" id="windowRoot">
-        <div class="titlebar">
-          <div class="dot red"></div>
-          <div class="dot yellow"></div>
-          <div class="dot green"></div>
-          <div class="title" id="itemTitle" contenteditable="true" title="Click để đổi tên">Trang chủ</div>
-          <div style="display:flex;gap:8px">
-            <button class="btn" id="saveBtn">Lưu</button>
-            <button class="btn" id="deleteBtn">Xóa</button>
-          </div>
-        </div>
-
-        <div class="inner">
-          <div class="panel">
-            <div class="meta">Nội dung tool (dán HTML/JS/CSS vào ô bên phải). Sau đó bấm <b>Render</b> để xem.</div>
-            <div class="editor">
-              <div class="toolbar">
-                <button class="btn" id="renderBtn">Render</button>
-                <button class="btn" id="saveContentBtn">Lưu nội dung</button>
-                <button class="btn" id="clearBtn">Xóa nội dung</button>
-                <div style="flex:1"></div>
-                <div class="small">Lưu tự động vào localStorage</div>
-              </div>
-              <textarea id="htmlEditor" placeholder="Dán code HTML/JS/CSS của tool vào đây (ví dụ copy toàn bộ body hay file HTML)." spellcheck="false"></textarea>
-            </div>
-          </div>
-
+    <!-- TAB BVTK -->
+    <div class="tab-content active" id="bvtk" role="tabpanel">
+      <div class="card">
+        <div class="row">
           <div>
-            <div class="meta">Xem trước</div>
-            <div class="preview" id="previewWrap">
-              <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
-            </div>
-            <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-              <div class="small">ID: <span id="itemId" class="small muted">-</span></div>
-              <div style="flex:1"></div>
-              <div class="small">Trạng thái: <span id="status" class="small muted">ready</span></div>
-            </div>
+            <label>Loại công trình</label>
+            <select id="buildingType">
+              <option value="canho">Căn hộ</option>
+              <option value="nhapho">Nhà phố</option>
+              <option value="bietthu">Biệt thự</option>
+              <option value="dichvu">Dịch vụ</option>
+            </select>
+          </div>
+          <div>
+            <label>Phong cách thiết kế</label>
+            <select id="designStyle">
+              <option value="hiendai">Hiện đại</option>
+              <option value="bancodien">Bán cổ điển</option>
+              <option value="khac">Khác</option>
+            </select>
           </div>
         </div>
 
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label>Số tầng thiết kế</label>
+            <input type="number" id="floors" min="1" value="1" />
+          </div>
+          <div>
+            <label>Diện tích mỗi tầng (m²)</label>
+            <input type="number" id="area" min="1" value="30" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Phạm vi công việc</label>
+          <div style="margin-top:8px">
+            <div class="scope-item">
+              <label><input type="checkbox" id="fitout"> <span class="label-text">Fitout</span></label>
+              <div id="fitout-controls" class="scope-sub" style="display:none;">
+                <span>Số lượng WC</span>
+                <input type="number" id="wcCount" min="0" value="0">
+                <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="hasStair"> <span>Thang bộ</span></label>
+              </div>
+            </div>
+            <div class="scope-item">
+              <label><input type="checkbox" id="fur"> <span class="label-text">Fur</span></label>
+              <div id="fur-controls" class="scope-sub" style="display:none;">
+                <span>Số lượng PN</span>
+                <input type="number" id="bedrooms" min="0" value="0">
+              </div>
+            </div>
+            <div class="scope-item">
+              <label><input type="checkbox" id="review"> <span class="label-text">Thời gian kiểm tra & chỉnh sửa (+1 ngày)</span></label>
+            </div>
+          </div>
+          <div class="hint">* Các ô phụ sẽ hiện khi bạn tick tương ứng.</div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label>Năng lực (triệu VNĐ/tháng)</label>
+            <input type="number" id="salary" min="1" value="10" />
+          </div>
+        </div>
       </div>
-    </main>
+
+      <div class="kpi" style="margin-top:12px">
+        <div class="item"><div class="muted">Tổng diện tích</div><div class="sum" id="totalArea">0 m²</div></div>
+        <div class="item"><div class="muted">Doanh số nhận được</div><div class="sum" id="totalRevenue">0 triệu VNĐ</div></div>
+        <div class="item"><div class="muted">Thời gian triển khai (ngày)</div><div class="sum" id="bvtkDays">0 ngày</div><div class="progress"><div id="progressBar" class="progress-bar"></div></div></div>
+      </div>
+    </div>
+
+    <!-- TAB BVTC -->
+    <div class="tab-content" id="bvtc" role="tabpanel">
+      <div class="card">
+        <div style="margin-bottom:8px"><strong>Phạm vi công việc</strong></div>
+        <div style="margin-bottom:12px">
+          <div class="scope-item">
+            <label><input type="checkbox" id="fitout2"> <span class="label-text">Fitout</span></label>
+            <div id="fitout2-controls" class="scope-sub" style="display:none;">
+              <span>Số lượng WC</span>
+              <input type="number" id="wcCount2" min="0" value="0">
+              <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="hasStair2"> <span>Thang bộ</span></label>
+            </div>
+          </div>
+          <div class="scope-item">
+            <label><input type="checkbox" id="fur2"> <span class="label-text">Fur</span></label>
+            <div id="fur2-controls" class="scope-sub" style="display:none;">
+              <span>Số lượng PN</span>
+              <input type="number" id="bedrooms2" min="0" value="0">
+            </div>
+          </div>
+          <div class="scope-item">
+            <label><input type="checkbox" id="review2"> <span class="label-text">Thời gian kiểm tra & chỉnh sửa (+1 ngày)</span></label>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:6px">
+          <div>
+            <label>Diện tích công trình (m²)</label>
+            <input type="number" id="area2" min="1" value="100" />
+          </div>
+          <div>
+            <label>Mức độ chỉnh sửa</label>
+            <select id="adjustLevel">
+              <option value="0.10">Ít (10%)</option>
+              <option value="0.20" selected>Trung bình (20%)</option>
+              <option value="0.30">Nhiều (30%)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label>Năng lực (triệu VNĐ/tháng)</label>
+            <input type="number" id="salary2" min="1" value="10" />
+          </div>
+          <div>
+            <label class="muted">Ghi chú</label>
+            <div class="hint">Đơn giá quy đổi 2D dùng theo phạm vi: Fitout 25.000 VNĐ/m², Fur 35.000 VNĐ/m²; nếu tick cả 2 thì cộng hai mức.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi" style="margin-top:12px">
+        <div class="item"><div class="muted">Diện tích công trình</div><div class="sum" id="bvtcAreaDisplay">0 m²</div></div>
+        <div class="item"><div class="muted">Doanh số quy đổi (ước)</div><div class="sum" id="bvtcValueDisplay">0 triệu VNĐ</div></div>
+        <div class="item"><div class="muted">Thời gian chỉnh sửa (ngày)</div><div class="sum" id="bvtcEditDays">0 ngày</div><div class="progress"><div id="progressBar2" class="progress-bar"></div></div></div>
+      </div>
+    </div>
+
+    <!-- TAB Fur -->
+    <div class="tab-content" id="fur" role="tabpanel">
+      <div class="card">
+        <div class="row">
+          <div>
+            <label>Giá trị hợp đồng Fur (triệu VNĐ)</label>
+            <input type="number" id="furValue" min="1" value="200" />
+          </div>
+          <div>
+            <label>Phong cách thiết kế</label>
+            <select id="furStyle">
+              <option value="modern">Hiện đại</option>
+              <option value="classic">Bán cổ điển</option>
+              <option value="other" selected>Khác</option>
+            </select>
+          </div>
+          <div>
+            <label>Số lượng món đồ</label>
+            <input type="number" id="itemCount" min="1" value="10" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label>Năng lực (triệu VNĐ/tháng)</label>
+            <input type="number" id="salary3" min="1" value="10" />
+          </div>
+          <div>
+            <label>Giá trị quy đổi 2D Fur (triệu VNĐ)</label>
+            <input type="text" id="furEffValue" readonly value="0.00" />
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi" style="margin-top:12px">
+        <div class="item"><div class="muted">Thời gian triển khai Fur (ngày)</div><div class="sum" id="furDays">0 ngày</div><div class="progress"><div id="progressBar3" class="progress-bar"></div></div></div>
+        <div class="item"><div class="muted">Ghi chú</div><div class="sum" id="furNote">—</div></div>
+      </div>
+
+      <div class="footer-note">Gợi ý hệ số: Hiện đại 6%, Bán cổ điển 9%, Khác 7.5%. Số món: >10 mỗi món +2% (tối đa +40%).</div>
+    </div>
+
+    <div class="footer-note" style="margin-top:18px">* Mọi thời gian đều tính theo <b>1 người</b>. Muốn tính cho đội, nhân chia theo số người.</div>
   </div>
 
-  <input type="file" id="fileImport" accept="application/json" style="display:none" />
+<script>
+// --- Utilities ---
+function toNumber(v){ return isNaN(parseFloat(v))?0:parseFloat(v); }
+function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
 
-  <script>
-    // ======= Data model (localStorage) =======
-    // Structure:
-    // {
-    //   tools: [{id, title, content}],
-    //   projects: [{id, title, content}],
-    //   active: {type: 'tool'|'project', id}
-    // }
+// --- Tab switch ---
+const tabBtns = document.querySelectorAll('.tab-btn');
+tabBtns.forEach(btn => btn.addEventListener('click', () => {
+  tabBtns.forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(btn.dataset.tab).classList.add('active');
+}));
 
-    const STORAGE_KEY = 'phuc_tools_v1';
+// ------------------ BVTK ------------------
+const floorsEl = document.getElementById('floors');
+const areaEl = document.getElementById('area');
+const salaryEl = document.getElementById('salary');
+const fitoutEl = document.getElementById('fitout');
+const furEl = document.getElementById('fur');
+const reviewEl = document.getElementById('review');
+const wcCountEl = document.getElementById('wcCount');
+const hasStairEl = document.getElementById('hasStair');
+const bedroomsEl = document.getElementById('bedrooms');
 
-    function uid(prefix='id'){return prefix + '_' + Math.random().toString(36).slice(2,9)}
+const totalAreaEl = document.getElementById('totalArea');
+const totalRevenueEl = document.getElementById('totalRevenue');
+const bvtkDaysEl = document.getElementById('bvtkDays');
+const progressBar = document.getElementById('progressBar');
 
-    function loadState(){
-      try{const s = localStorage.getItem(STORAGE_KEY); return s? JSON.parse(s): {tools:[], projects:[], active:{type:'tool', id:null}}}catch(e){console.error(e); return {tools:[],projects:[],active:{type:'tool',id:null}}}
-    }
-    function saveState(state){localStorage.setItem(STORAGE_KEY, JSON.stringify(state))}
+function pricePerM2_scope(scopeFit, scopeFur){
+  let p = 0;
+  if(scopeFit) p += 25000;
+  if(scopeFur) p += 35000;
+  return p>0? p: 30000;
+}
 
-    let state = loadState();
+function calcBVTK(){
+  const floors = Math.max(1, Math.floor(toNumber(floorsEl.value)));
+  const areaPer = Math.max(0, toNumber(areaEl.value));
+  const totalArea = Math.round(floors * areaPer);
+  totalAreaEl.textContent = totalArea.toLocaleString('vi-VN') + " m²";
 
-    // Initialize with sample home tool if empty
-    function initDefaults(){
-      if(state.tools.length===0 && state.projects.length===0){
-        const t = {id:uid('tool'), title:'Thời Gian Khai Triển 2D (paste code vào)', content:'<p>Chèn code tool tại đây.</p>'};
-        state.tools.push(t);
-        state.active = {type:'tool', id:t.id};
-        saveState(state);
-      }
-    }
+  const salary = toNumber(salaryEl.value);
+  const dailySalary = (salary*1e6)/25;
 
-    initDefaults();
+  const scopeRate = pricePerM2_scope(fitoutEl.checked, furEl.checked); // VNĐ/m2
+  const revenue = totalArea * scopeRate; // VNĐ
+  totalRevenueEl.textContent = (revenue/1e6).toFixed(2) + " triệu VNĐ";
 
-    // ======= UI refs =======
-    const toolsList = document.getElementById('toolsList');
-    const projectsList = document.getElementById('projectsList');
-    const newToolBtn = document.getElementById('newToolBtn');
-    const newProjectBtn = document.getElementById('newProjectBtn');
-    const itemTitle = document.getElementById('itemTitle');
-    const itemId = document.getElementById('itemId');
-    const htmlEditor = document.getElementById('htmlEditor');
-    const renderBtn = document.getElementById('renderBtn');
-    const saveContentBtn = document.getElementById('saveContentBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const deleteBtn = document.getElementById('deleteBtn');
-    const previewFrame = document.getElementById('previewFrame');
-    const status = document.getElementById('status');
-    const exportBtn = document.getElementById('exportBtn');
-    const importBtn = document.getElementById('importBtn');
-    const fileImport = document.getElementById('fileImport');
+  // base days (làm mới toàn bộ)
+  const baseDays = (dailySalary>0) ? Math.round((revenue / dailySalary) * 10) / 10 : 0;
 
-    // ======= Render sidebar =======
-    function renderSidebar(){
-      toolsList.innerHTML = '';
-      state.tools.forEach(t=>{
-        const el = document.createElement('div');
-        el.className = 'item' + (state.active.type==='tool' && state.active.id===t.id ? ' active' : '');
-        el.textContent = t.title;
-        el.title = 'Click để mở. Double-click để đổi tên.';
-        el.addEventListener('click', ()=> openItem('tool', t.id));
-        el.addEventListener('dblclick', ()=> renameItemInline('tool', t.id, el));
-        toolsList.appendChild(el);
-      });
+  // extras
+  let extraDays = 0;
+  if(fitoutEl.checked){
+    extraDays += Math.max(0, Math.floor(toNumber(wcCountEl.value))) * 0.5;
+    if(hasStairEl.checked) extraDays += 1;
+  }
+  if(furEl.checked){
+    extraDays += Math.max(0, Math.floor(toNumber(bedroomsEl.value))) * 0.5;
+  }
+  if(reviewEl.checked) extraDays += 1;
 
-      projectsList.innerHTML = '';
-      state.projects.forEach(p=>{
-        const el = document.createElement('div');
-        el.className = 'project-item' + (state.active.type==='project' && state.active.id===p.id ? ' active' : '');
-        el.textContent = p.title;
-        el.addEventListener('click', ()=> openItem('project', p.id));
-        el.addEventListener('dblclick', ()=> renameItemInline('project', p.id, el));
-        projectsList.appendChild(el);
-      });
-    }
+  const finalDays = Math.round((baseDays + extraDays) * 10) / 10;
+  bvtkDaysEl.textContent = finalDays + " ngày";
+  progressBar.style.width = Math.min(100, (finalDays/30)*100) + "%";
+}
 
-    function renameItemInline(type,id,element){
-      const list = type==='tool'? state.tools : state.projects;
-      const item = list.find(x=>x.id===id);
-      if(!item) return;
-      const input = document.createElement('input');
-      input.value = item.title;
-      input.style.width = '100%';
-      input.style.padding = '6px';
-      element.innerHTML = '';
-      element.appendChild(input);
-      input.focus();
-      input.select();
-      input.addEventListener('blur', ()=>{ item.title = input.value || 'Untitled'; saveState(state); renderSidebar(); });
-      input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ input.blur(); } });
-    }
+// show/hide subcontrols for BVTK
+fitoutEl.addEventListener('change', ()=> {
+  document.getElementById('fitout-controls').style.display = fitoutEl.checked ? 'flex' : 'none';
+  calcBVTK();
+});
+furEl.addEventListener('change', ()=> {
+  document.getElementById('fur-controls').style.display = furEl.checked ? 'flex' : 'none';
+  calcBVTK();
+});
 
-    // ======= Open item =======
-    function openItem(type,id){
-      state.active = {type, id};
-      saveState(state);
-      renderSidebar();
-      const list = type==='tool'? state.tools : state.projects;
-      const item = list.find(x=>x.id===id);
-      if(!item) return;
-      itemTitle.textContent = item.title;
-      itemId.textContent = item.id;
-      htmlEditor.value = item.content || '';
-      previewFrame.srcdoc = item.content || '<p>Preview</p>';
-    }
+// ------------------ BVTC ------------------
+const fitout2El = document.getElementById('fitout2');
+const fur2El = document.getElementById('fur2');
+const review2El = document.getElementById('review2');
+const wcCount2El = document.getElementById('wcCount2');
+const hasStair2El = document.getElementById('hasStair2');
+const bedrooms2El = document.getElementById('bedrooms2');
+const area2El = document.getElementById('area2');
+const adjustLevelEl = document.getElementById('adjustLevel');
+const salary2El = document.getElementById('salary2');
 
-    // ======= Create new =======
-    newToolBtn.addEventListener('click', ()=>{
-      const t = {id:uid('tool'), title:'New Tool', content:'<p>Chèn code ở đây.</p>'};
-      state.tools.unshift(t);
-      state.active = {type:'tool', id:t.id};
-      saveState(state); renderSidebar(); openItem('tool', t.id);
-    });
+const bvtcAreaDisplay = document.getElementById('bvtcAreaDisplay');
+const bvtcValueDisplay = document.getElementById('bvtcValueDisplay');
+const bvtcEditDays = document.getElementById('bvtcEditDays');
+const progressBar2 = document.getElementById('progressBar2');
 
-    newProjectBtn.addEventListener('click', ()=>{
-      const p = {id:uid('proj'), title:'New Project', content:'<p>Mô tả dự án</p>'};
-      state.projects.unshift(p);
-      state.active = {type:'project', id:p.id};
-      saveState(state); renderSidebar(); openItem('project', p.id);
-    });
+fitout2El.addEventListener('change', ()=> {
+  document.getElementById('fitout2-controls').style.display = fitout2El.checked ? 'flex' : 'none';
+  calcBVTC();
+});
+fur2El.addEventListener('change', ()=> {
+  document.getElementById('fur2-controls').style.display = fur2El.checked ? 'flex' : 'none';
+  calcBVTC();
+});
 
-    // ======= Save title (inline) =======
-    itemTitle.addEventListener('blur', ()=>{
-      const active = state.active; if(!active.id) return;
-      const list = active.type==='tool'? state.tools : state.projects;
-      const item = list.find(x=>x.id===active.id);
-      if(!item) return;
-      item.title = itemTitle.textContent.trim() || 'Untitled';
-      saveState(state); renderSidebar();
-    });
+function scopeRateBVTC_calc(){
+  let p=0;
+  if(fitout2El.checked) p += 25000;
+  if(fur2El.checked) p += 35000;
+  return p>0? p : 30000;
+}
 
-    itemTitle.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); itemTitle.blur(); } });
+function calcBVTC(){
+  const area = Math.round(Math.max(0, toNumber(area2El.value)));
+  bvtcAreaDisplay.textContent = area.toLocaleString('vi-VN') + " m²";
 
-    // ======= Render preview & save content =======
-    renderBtn.addEventListener('click', ()=>{
-      previewFrame.srcdoc = htmlEditor.value || '<p>Preview</p>'; status.textContent = 'rendered';
-    });
+  const rate = scopeRateBVTC_calc(); // VNĐ/m2
+  const valueVNĐ = area * rate;
+  bvtcValueDisplay.textContent = (valueVNĐ/1e6).toFixed(2) + " triệu VNĐ";
 
-    saveContentBtn.addEventListener('click', ()=>{
-      const active = state.active; if(!active.id) return;
-      const list = active.type==='tool'? state.tools : state.projects;
-      const item = list.find(x=>x.id===active.id);
-      if(!item) return;
-      item.content = htmlEditor.value;
-      saveState(state);
-      status.textContent = 'saved';
-      renderSidebar();
-    });
+  const salary = toNumber(salary2El.value);
+  const dailySalary = (salary*1e6)/25;
+  const baseDays = (dailySalary>0) ? (valueVNĐ / dailySalary) : 0;
 
-    saveBtn.addEventListener('click', ()=>{ saveContentBtn.click(); alert('Đã lưu.'); });
+  const adjust = toNumber(adjustLevelEl.value);
+  let editDays = Math.round(baseDays * adjust * 10) / 10;
 
-    clearBtn.addEventListener('click', ()=>{ if(confirm('Xóa nội dung hiện tại?')){ htmlEditor.value = ''; previewFrame.srcdoc = '<p>Preview</p>'; status.textContent = 'cleared'; } });
+  // extra days from sub items
+  let extraDays = 0;
+  if(fitout2El.checked){
+    extraDays += Math.max(0, Math.floor(toNumber(wcCount2El.value))) * 0.5;
+    if(hasStair2El.checked) extraDays += 1;
+  }
+  if(fur2El.checked){
+    extraDays += Math.max(0, Math.floor(toNumber(bedrooms2El.value))) * 0.5;
+  }
+  if(review2El.checked) extraDays += 1;
 
-    deleteBtn.addEventListener('click', ()=>{
-      if(!state.active.id) return; if(!confirm('Xóa item này?')) return;
-      const {type,id} = state.active;
-      if(type==='tool') state.tools = state.tools.filter(t=>t.id!==id); else state.projects = state.projects.filter(p=>p.id!==id);
-      // set new active
-      const next = state.tools[0] || state.projects[0];
-      if(next){ if(state.tools.find(t=>t.id===next.id)) state.active = {type:'tool', id:next.id}; else state.active = {type:'project', id:next.id}; }
-      else state.active = {type:'tool', id:null};
-      saveState(state);
-      renderSidebar();
-      if(state.active.id) openItem(state.active.type, state.active.id); else { itemTitle.textContent='Trang chủ'; itemId.textContent='-'; htmlEditor.value=''; previewFrame.srcdoc='<p>Preview</p>'; }
-    });
+  const finalEditDays = Math.round((editDays + extraDays) * 10) / 10;
+  bvtcEditDays.textContent = finalEditDays + " ngày";
+  progressBar2.style.width = Math.min(100, (finalEditDays/30)*100) + "%";
+}
 
-    // ======= Export / Import =======
-    exportBtn.addEventListener('click', ()=>{
-      const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'phuc-tools-backup.json'; a.click(); URL.revokeObjectURL(url);
-    });
+// ------------------ Fur tab ------------------
+const furValueEl = document.getElementById('furValue');
+const furStyleEl = document.getElementById('furStyle');
+const itemCountEl = document.getElementById('itemCount');
+const salary3El = document.getElementById('salary3');
+const furEffValueEl = document.getElementById('furEffValue');
+const furDaysEl = document.getElementById('furDays');
+const furNote = document.getElementById('furNote');
+const progressBar3 = document.getElementById('progressBar3');
 
-    importBtn.addEventListener('click', ()=> fileImport.click());
-    fileImport.addEventListener('change', ()=>{
-      const f = fileImport.files[0]; if(!f) return; const reader = new FileReader(); reader.onload = e=>{
-        try{ const imported = JSON.parse(e.target.result); if(imported.tools && imported.projects){ state = imported; saveState(state); renderSidebar(); if(state.active.id) openItem(state.active.type, state.active.id); alert('Import thành công'); } else alert('File không hợp lệ'); }
-        catch(err){alert('Import lỗi: '+err.message)}
-      }; reader.readAsText(f);
-    });
+function styleFactor(val){
+  if(val==='modern') return 0.06;
+  if(val==='classic') return 0.09;
+  return 0.075;
+}
+function itemMultiplier(n){
+  n = Math.max(1, Math.floor(n||0));
+  const delta = n - 10;
+  let m = 1 + 0.02*delta;
+  m = Math.max(0.6, Math.min(1.4, m));
+  return m;
+}
 
-    // ======= Init =======
-    renderSidebar();
-    if(state.active && state.active.id){ openItem(state.active.type, state.active.id); }
+function calcFur(){
+  const contract = toNumber(furValueEl.value); // triệu
+  const style = furStyleEl.value;
+  const items = Math.max(0, Math.floor(toNumber(itemCountEl.value)));
+  const salary = toNumber(salary3El.value);
+  const effTri = contract * styleFactor(style) * itemMultiplier(items); // triệu
+  furEffValueEl.value = effTri.toFixed(2);
+  const dailySalary = (salary*1e6)/25;
+  const days = dailySalary>0 ? Math.round((effTri*1e6)/dailySalary*10)/10 : 0;
+  furDaysEl.textContent = days + " ngày";
+  progressBar3.style.width = Math.min(100, (days/30)*100) + "%";
+  furNote.textContent = `Style ${Math.round(styleFactor(style)*1000)/10}% · itemMult ${Math.round(itemMultiplier(items)*100)/100}`;
+}
 
-    // Auto-save content while typing (throttle)
-    let typingTimer = null;
-    htmlEditor.addEventListener('input', ()=>{
-      clearTimeout(typingTimer);
-      typingTimer = setTimeout(()=>{
-        const active = state.active; if(!active.id) return;
-        const list = active.type==='tool'? state.tools : state.projects;
-        const item = list.find(x=>x.id===active.id);
-        if(!item) return; item.content = htmlEditor.value; saveState(state); status.textContent = 'auto-saved';
-      }, 800);
-    });
+// ------------------ events hookup ------------------
+// BVTK
+['floors','area','salary','fitout','fur','wcCount','hasStair','bedrooms','review'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input', calcBVTK);
+  el.addEventListener('change', calcBVTK);
+});
 
-    // Keyboard shortcuts: Ctrl/Cmd+S to save content
-    window.addEventListener('keydown', (e)=>{
-      if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); saveContentBtn.click(); }
-    });
+// BVTC
+['fitout2','fur2','wcCount2','hasStair2','bedrooms2','area2','adjustLevel','salary2','review2'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input', calcBVTC);
+  el.addEventListener('change', calcBVTC);
+});
 
-  </script>
+// Fur
+['furValue','furStyle','itemCount','salary3'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input', calcFur);
+  el.addEventListener('change', calcFur);
+});
+
+// init
+try{
+  (document.getElementById('fitout-controls') || {style:{}}).style.display = fitoutEl && fitoutEl.checked ? 'flex' : 'none';
+  (document.getElementById('fur-controls') || {style:{}}).style.display = furEl && furEl.checked ? 'flex' : 'none';
+  (document.getElementById('fitout2-controls') || {style:{}}).style.display = fitout2El && fitout2El.checked ? 'flex' : 'none';
+  (document.getElementById('fur2-controls') || {style:{}}).style.display = fur2El && fur2El.checked ? 'flex' : 'none';
+} catch(e){
+  console.warn(e);
+}
+
+calcBVTK(); calcBVTC(); calcFur();
+</script>
 </body>
 </html>
